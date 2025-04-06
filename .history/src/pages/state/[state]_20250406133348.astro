@@ -1,0 +1,73 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getAllStates, getStateBySlug } from '../../utils/dataUtils';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+
+// Enable on-demand rendering instead of static generation
+export const prerender = false;
+
+// Get the state slug from the URL
+const { state: stateSlug } = Astro.params;
+
+// Get state data
+const stateData = await getStateBySlug(stateSlug || '');
+
+// If state not found, return 404
+if (!stateData) {
+  return Astro.redirect('/404');
+}
+
+// Sort cities by plumber count (descending)
+const sortedCities = [...stateData.cities].sort((a, b) => b.plumberCount - a.plumberCount);
+
+// SEO
+const title = `Plumbers in ${stateData.name} | Plumber Near Me`;
+const description = `Find reliable plumbers in ${stateData.name}. Browse our directory of ${stateData.plumberCount} plumbing services across ${stateData.cities.length} cities in ${stateData.name}.`;
+---
+
+<Layout
+  title={title}
+  description={description}
+  canonicalUrl={`/state/${stateSlug}/`}
+>
+  <Breadcrumbs 
+    items={[
+      { name: "States", url: "/state/" },
+      { name: stateData.name, url: `/state/${stateSlug}/` }
+    ]}
+  />
+
+  <h1 class="text-4xl font-bold mb-2">Plumbers in {stateData.name}</h1>
+  <p class="mb-8 text-lg max-w-3xl">Browse {stateData.plumberCount} plumbing professionals across {stateData.cities.length} cities in {stateData.name}.</p>
+
+  <div class="mb-8">
+    <h2 class="text-2xl font-bold mb-4">Cities in {stateData.name}</h2>
+    
+    {sortedCities.length > 0 ? (
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {sortedCities.map(city => (
+          <a
+            href={`/state/${stateSlug}/${city.slug}/`}
+            class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow border border-base-200"
+          >
+            <div class="card-body p-4">
+              <h3 class="card-title text-lg">{city.name}</h3>
+              <span class="text-sm badge badge-outline">{city.plumberCount} plumbers</span>
+            </div>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="alert alert-info">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span>No cities found with plumbers in {stateData.name}.</span>
+      </div>
+    )}
+  </div>
+
+  <div class="mt-16 bg-base-200 rounded-xl p-8">
+    <h2 class="text-2xl font-bold mb-4">About Plumbers in {stateData.name}</h2>
+    <p class="mb-3">Our comprehensive directory of plumbers in {stateData.name} makes it easy to find qualified plumbing professionals near you. Browse plumbers by city, view ratings and reviews, and get the information you need to make an informed decision.</p>
+    <p>Each plumber listing includes important details such as contact information, service areas, customer reviews, and more. Our goal is to connect you with reliable plumbing services to address your plumbing needs in {stateData.name}.</p>
+  </div>
+</Layout> 

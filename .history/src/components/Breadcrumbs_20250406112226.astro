@@ -1,0 +1,47 @@
+---
+export interface BreadcrumbItem {
+  name: string;
+  url: string;
+}
+
+interface Props {
+  items: BreadcrumbItem[];
+  structured?: boolean;
+}
+
+const { items, structured = true } = Astro.props;
+---
+
+<div class="text-sm breadcrumbs mb-4">
+  <ul>
+    <li><a href="/">Home</a></li>
+    {items.map((item) => (
+      <li>
+        <a href={item.url}>{item.name}</a>
+      </li>
+    ))}
+  </ul>
+</div>
+
+{structured && (
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://plumbernearme.shop/"
+      },
+      ...items.map((item, index) => ({
+        "@type": "ListItem",
+        "position": index + 2,
+        "name": item.name,
+        "item": item.url.startsWith('http') 
+          ? item.url 
+          : `https://plumbernearme.shop${item.url}`
+      }))
+    ]
+  })} />
+)} 

@@ -1,0 +1,97 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { getAllStates, getStateBySlug, getCityBySlug, getPlumbersInCity } from '../../../utils/dataUtils';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import PlumberGrid from '../../../components/PlumberGrid.astro';
+import { generateLocalBusinessListStructuredData } from '../../../utils/seoUtils';
+
+// Enable on-demand rendering instead of static generation
+export const prerender = false;
+
+// Get the slugs from the URL
+const { state: stateSlug, city: citySlug } = Astro.params;
+
+// Get state data
+const stateData = await getStateBySlug(stateSlug || '');
+
+// If state not found, return 404
+if (!stateData) {
+  return Astro.redirect('/404');
+}
+
+// Get city data
+const cityData = await getCityBySlug(stateSlug || '', citySlug || '');
+
+// If city not found, return 404
+if (!cityData) {
+  return Astro.redirect('/404');
+}
+
+// Get plumbers in this city
+const plumbers = await getPlumbersInCity(stateSlug || '', citySlug || '');
+
+// Sort plumbers by rating and review count
+const sortedPlumbers = [...plumbers].sort((a, b) => {
+  // First sort by rating
+  if (b.rating !== a.rating) {
+    return (b.rating || 0) - (a.rating || 0);
+  }
+  // Then by review count
+  return (b.reviewCount || 0) - (a.reviewCount || 0);
+});
+
+// SEO
+const title = `Top Plumbers in ${cityData.name}, ${stateData.name} | Plumber Near Me`;
+const description = `Find reliable plumbers in ${cityData.name}, ${stateData.name}. Browse our directory of ${plumbers.length} local plumbing services with reviews and ratings.`;
+
+// Generate structured data
+const structuredData = generateLocalBusinessListStructuredData(
+  sortedPlumbers,
+  `${cityData.name}, ${stateData.name}`
+);
+---
+
+<Layout
+  title={title}
+  description={description}
+  canonicalUrl={`/state/${stateSlug}/${citySlug}/`}
+  structuredData={structuredData}
+>
+  <Breadcrumbs 
+    items={[
+      { name: "States", url: "/state/" },
+      { name: stateData.name, url: `/state/${stateSlug}/` },
+      { name: cityData.name, url: `/state/${stateSlug}/${citySlug}/` }
+    ]}
+  />
+
+  <h1 class="text-4xl font-bold mb-2">Plumbers in {cityData.name}, {stateData.name}</h1>
+  <p class="mb-8 text-lg max-w-3xl">Browse {plumbers.length} plumbing professionals in {cityData.name}, {stateData.name}. Find contact information, ratings, reviews, and more.</p>
+
+  <div class="mb-8">
+    <PlumberGrid 
+      plumbers={sortedPlumbers} 
+      showLocation={false}
+      cols={3}
+    />
+  </div>
+
+  <div class="mt-16 bg-base-200 rounded-xl p-8">
+    <h2 class="text-2xl font-bold mb-4">Need a Plumber in {cityData.name}?</h2>
+    <p class="mb-3">Our comprehensive directory of plumbers in {cityData.name}, {stateData.name} makes it easy to find qualified plumbing professionals near you. Browse local plumbers, view ratings and reviews, and get the information you need to make an informed decision.</p>
+    <p>Each plumber listing includes important details such as contact information, service areas, customer reviews, and more. Our goal is to connect you with reliable plumbing services to address your plumbing needs in {cityData.name}.</p>
+    
+    <div class="mt-6">
+      <h3 class="text-xl font-semibold mb-3">Common Plumbing Services in {cityData.name}</h3>
+      <ul class="list-disc pl-5 space-y-1">
+        <li>Clogged drain cleaning</li>
+        <li>Water heater repair and installation</li>
+        <li>Pipe repair and replacement</li>
+        <li>Fixture installation</li>
+        <li>Water leak detection and repair</li>
+        <li>Sewer line services</li>
+        <li>Emergency plumbing</li>
+      </ul>
+    </div>
+  </div>
+</Layout> 

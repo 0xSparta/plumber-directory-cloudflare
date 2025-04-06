@@ -1,0 +1,75 @@
+---
+import type { PlumberData } from '../utils/dataUtils';
+import { slugify } from '../utils/dataUtils';
+
+interface Props {
+  plumber: PlumberData;
+  showLocation?: boolean;
+}
+
+const { plumber, showLocation = true } = Astro.props;
+
+const locationPath = plumber.state && plumber.city 
+  ? `/state/${slugify(plumber.state)}/${slugify(plumber.city)}`
+  : null;
+
+const imageSrc = plumber.thumbnail || (plumber.images && plumber.images.length > 0 
+  ? plumber.images[0].image 
+  : '/images/placeholder.jpg');
+
+function formatRating(rating: number | undefined): string {
+  return rating ? rating.toFixed(1) : 'N/A';
+}
+---
+
+<div class="card card-compact bg-base-100 shadow-xl h-full hover:shadow-2xl transition-shadow duration-300">
+  <figure class="h-48 overflow-hidden">
+    <img 
+      src={imageSrc} 
+      alt={`${plumber.title} - Plumber`} 
+      class="object-cover w-full h-full"
+      loading="lazy"
+    />
+  </figure>
+  <div class="card-body">
+    <h2 class="card-title text-lg">{plumber.title}</h2>
+    
+    {showLocation && (
+      <div class="text-sm opacity-75">
+        {plumber.city && plumber.state 
+          ? (
+            <a href={locationPath} class="link link-hover">
+              {plumber.city}, {plumber.state}
+            </a>
+          ) 
+          : "Location not specified"
+        }
+      </div>
+    )}
+    
+    <div class="flex items-center mt-1">
+      {plumber.rating && (
+        <div class="badge badge-primary mr-2">★ {formatRating(plumber.rating)}</div>
+      )}
+      {plumber.reviewCount && (
+        <span class="text-xs opacity-75">({plumber.reviewCount} reviews)</span>
+      )}
+    </div>
+    
+    {plumber.phone && (
+      <div class="text-sm mt-2">
+        <span class="font-semibold">Phone:</span> {plumber.phone}
+      </div>
+    )}
+    
+    {plumber.hours && plumber.hours.Monday && (
+      <div class="text-xs mt-1 opacity-75">
+        <span class="font-semibold">Hours:</span> {plumber.hours.Monday[0]}
+      </div>
+    )}
+    
+    <div class="card-actions justify-end mt-3">
+      <a href={`/plumber/${plumber.slug}`} class="btn btn-primary btn-sm">View Details</a>
+    </div>
+  </div>
+</div> 

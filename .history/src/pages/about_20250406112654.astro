@@ -1,0 +1,88 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+
+// SEO
+const title = "About Plumber Near Me | Your Trusted Plumbing Directory";
+const description = "Learn about Plumber Near Me - your comprehensive directory for finding qualified plumbing professionals across the United States with verified reviews and ratings.";
+---
+
+<Layout
+  title={title}
+  description={description}
+  canonicalUrl="/about/"
+>
+  <Breadcrumbs 
+    items={[
+      { name: "About", url: "/about/" }
+    ]}
+  />
+
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-4xl font-bold mb-6">About Plumber Near Me</h1>
+    
+    <div class="prose max-w-none">
+      <p class="lead text-xl">Plumber Near Me is your trusted resource for finding reliable plumbing professionals across the United States.</p>
+      
+      <h2 class="text-2xl font-bold mt-8 mb-4">Our Mission</h2>
+      <p>
+        Our mission is to connect homeowners and businesses with qualified plumbing professionals quickly and easily. We understand that when plumbing issues arise, you need reliable help fast. That's why we've created a comprehensive directory that makes it simple to find and contact plumbers in your area.
+      </p>
+      
+      <h2 class="text-2xl font-bold mt-8 mb-4">What We Offer</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+        <div class="card bg-base-100 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title">Extensive Directory</h3>
+            <p>Browse our extensive database of plumbers across the United States. Search by state, city, or browse directly to find the perfect professional for your needs.</p>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title">Verified Reviews</h3>
+            <p>Read authentic customer reviews to help you make informed decisions. Our transparent review system lets you see ratings and feedback from real customers.</p>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title">Detailed Listings</h3>
+            <p>View comprehensive information about each plumber, including contact details, business hours, service areas, and more.</p>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title">Free Access</h3>
+            <p>Our service is completely free for consumers. We believe everyone should have access to quality plumbing services without any barriers.</p>
+          </div>
+        </div>
+      </div>
+      
+      <h2 class="text-2xl font-bold mt-8 mb-4">How It Works</h2>
+      <ol class="list-decimal pl-6 space-y-3">
+        <li><strong>Browse:</strong> Search for plumbers by state, city, or browse our featured listings.</li>
+        <li><strong>Compare:</strong> Review ratings, customer feedback, and service details to find the right match for your needs.</li>
+        <li><strong>Contact:</strong> Reach out directly to the plumber using the provided contact information.</li>
+        <li><strong>Resolve:</strong> Get your plumbing issues resolved by a qualified professional.</li>
+      </ol>
+      
+      <h2 class="text-2xl font-bold mt-8 mb-4">Our Commitment to Quality</h2>
+      <p>
+        At Plumber Near Me, we're committed to maintaining a high-quality directory of plumbing professionals. We continuously update our listings to ensure you have access to accurate and current information. While we don't personally endorse any specific plumber, we provide the tools and information you need to make an informed decision.
+      </p>
+      
+      <div class="bg-primary text-primary-content p-8 rounded-xl my-8">
+        <h2 class="text-2xl font-bold mb-4">Need a Plumber?</h2>
+        <p class="mb-4">Start browsing our directory today to find reliable plumbing professionals in your area.</p>
+        <div class="flex gap-4 mt-4">
+          <a href="/state" class="btn btn-secondary">Browse by State</a>
+          <a href="/contact" class="btn btn-outline">Contact Us</a>
+        </div>
+      </div>
+      
+      <h2 class="text-2xl font-bold mt-8 mb-4">Get In Touch</h2>
+      <p>
+        Have questions, suggestions, or feedback? We'd love to hear from you! Visit our <a href="/contact" class="link link-primary">Contact page</a> to get in touch with our team.
+      </p>
+    </div>
+  </div>
+</Layout> 

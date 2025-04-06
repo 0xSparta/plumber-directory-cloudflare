@@ -1,0 +1,407 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getPlumberBySlug, loadPlumberData, slugify } from '../../utils/dataUtils';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { generatePlumberStructuredData } from '../../utils/seoUtils';
+
+// Get the plumber slug from URL
+const { slug } = Astro.params;
+
+// Get plumber data
+const plumber = await getPlumberBySlug(slug || '');
+
+// If plumber not found, return 404
+if (!plumber) {
+  return Astro.redirect('/404');
+}
+
+// Build breadcrumb items
+let breadcrumbItems = [];
+if (plumber.state && plumber.city) {
+  breadcrumbItems = [
+    { name: "States", url: "/state/" },
+    { name: plumber.state, url: `/state/${slugify(plumber.state)}/` },
+    { name: plumber.city, url: `/state/${slugify(plumber.state)}/${slugify(plumber.city)}/` },
+    { name: plumber.title, url: `/plumber/${plumber.slug}/` }
+  ];
+} else {
+  breadcrumbItems = [
+    { name: "Plumbers", url: "/plumber/" },
+    { name: plumber.title, url: `/plumber/${plumber.slug}/` }
+  ];
+}
+
+// SEO
+const title = `${plumber.title} | Plumber in ${plumber.city || 'Your Area'}, ${plumber.state || ''}`;
+const description = plumber.description || `${plumber.title} provides plumbing services${plumber.city ? ` in ${plumber.city}, ${plumber.state}` : ''}. Contact them at ${plumber.phone || 'the provided contact details'} for all your plumbing needs.`;
+
+// Reviews summary
+const reviewSummary = plumber.review_summary || '';
+
+// Hours formatting
+function formatHours(hours: Record<string, string[]> | undefined) {
+  if (!hours) return [];
+  
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  return days.map(day => ({
+    day,
+    schedule: hours[day] ? hours[day][0] : 'Closed'
+  }));
+}
+
+const formattedHours = formatHours(plumber.hours);
+
+// Structured data
+const structuredData = generatePlumberStructuredData(plumber);
+
+// Generate static paths for all plumbers
+export async function getStaticPaths() {
+  const allPlumbers = await loadPlumberData();
+  
+  return allPlumbers.map(plumber => ({
+    params: { slug: plumber.slug }
+  }));
+}
+
+// Background style for hero section
+const heroStyle = plumber.thumbnail 
+  ? `background-image: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.4)), url(${plumber.thumbnail}); background-size: cover; background-position: center;` 
+  : '';
+---
+
+<Layout
+  title={title}
+  description={description}
+  canonicalUrl={`/plumber/${plumber.slug}/`}
+  structuredData={structuredData}
+>
+  <div class="container mx-auto px-4 py-8">
+    <Breadcrumbs items={breadcrumbItems} />
+    
+    <!-- Hero Section -->
+    <div 
+      class="relative rounded-2xl overflow-hidden mb-8 shadow-xl"
+      style={heroStyle}
+    >
+      <div class="py-12 md:py-24 px-6 md:px-12 text-white">
+        <div class="max-w-4xl">
+          <h1 class="text-3xl md:text-5xl font-bold mb-4">{plumber.title}</h1>
+          
+          {plumber.city && plumber.state && (
+            <p class="text-lg md:text-xl mb-6 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <a href={`/state/${slugify(plumber.state)}/${slugify(plumber.city)}/`} class="hover:underline">
+                {plumber.city}, {plumber.state}
+              </a>
+            </p>
+          )}
+          
+          <!-- Rating Badge -->
+          {plumber.rating && (
+            <div class="flex items-center mb-6">
+              <div class="flex items-center bg-primary text-primary-content px-4 py-2 rounded-lg mr-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                <span class="font-bold text-xl">{plumber.rating.toFixed(1)}</span>
+              </div>
+              {plumber.reviewCount && (
+                <span class="text-base">
+                  {plumber.reviewCount} {plumber.reviewCount === 1 ? 'review' : 'reviews'}
+                </span>
+              )}
+            </div>
+          )}
+          
+          <!-- Quick Contact -->
+          <div class="flex flex-wrap gap-4 mt-8">
+            {plumber.phone && (
+              <a href={`tel:${plumber.phone}`} class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                Call Now
+              </a>
+            )}
+            
+            {plumber.website && (
+              <a href={plumber.website} target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                </svg>
+                Visit Website
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-2">
+        <div class="space-y-10">
+          <!-- Gallery Section -->
+          {plumber.images && plumber.images.length > 0 && (
+            <div class="card bg-base-100 shadow-lg overflow-hidden">
+              <div class="card-body">
+                <h2 class="card-title text-2xl mb-3">Photo Gallery</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {plumber.images.slice(0, 6).map((image) => (
+                    <div class="aspect-square overflow-hidden rounded-xl bg-base-200 hover:opacity-90 transition-all">
+                      {image.image ? (
+                        <img 
+                          src={image.image} 
+                          alt={`${plumber.title} - ${image.title}`} 
+                          class="w-full h-full object-cover"
+                          loading="lazy"
+                          onerror="this.style.display='none'; this.parentNode.classList.add('flex', 'items-center', 'justify-center');"
+                        />
+                      ) : (
+                        <div class="flex items-center justify-center w-full h-full">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-base-content opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <!-- About Section -->
+          {reviewSummary && (
+            <div class="card bg-base-100 shadow-lg overflow-hidden">
+              <div class="card-body">
+                <h2 class="card-title text-2xl mb-3">About {plumber.title}</h2>
+                <div class="prose max-w-none">
+                  <p class="whitespace-pre-line">{reviewSummary}</p>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <!-- Reviews Section -->
+          {plumber.reviews && plumber.reviews.length > 0 && (
+            <div class="card bg-base-100 shadow-lg overflow-hidden">
+              <div class="card-body">
+                <div class="flex items-center justify-between mb-6">
+                  <h2 class="card-title text-2xl">Customer Reviews</h2>
+                  {plumber.rating && (
+                    <div class="flex items-center gap-2">
+                      <div class="flex">
+                        {[1, 2, 3, 4, 5].map(star => (
+                          <svg xmlns="http://www.w3.org/2000/svg" class={`h-5 w-5 ${star <= Math.round(plumber.rating) ? 'text-warning' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                          </svg>
+                        ))}
+                      </div>
+                      <span class="font-semibold">{plumber.rating.toFixed(1)}</span>
+                      <span class="text-sm text-gray-600">({plumber.reviewCount} {plumber.reviewCount === 1 ? 'review' : 'reviews'})</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div class="space-y-6">
+                  {plumber.reviews.slice(0, 10).map((review, index) => (
+                    <div class="border border-base-300 rounded-xl p-5 hover:shadow-md transition-shadow">
+                      <div class="flex justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                          {review.ProfilePicture ? (
+                            <div class="avatar">
+                              <div class="w-12 h-12 rounded-full bg-base-200">
+                                <img 
+                                  src={review.ProfilePicture} 
+                                  alt={review.Name} 
+                                  onerror="this.style.display='none'; this.parentNode.innerHTML='<div class=\'flex items-center justify-center w-full h-full bg-primary text-primary-content\'><span class=\'text-lg font-bold\'>' + review.Name.charAt(0).toUpperCase() + '</span></div>';"
+                                />
+                              </div>
+                            </div>
+                          ) : (
+                            <div class="avatar placeholder">
+                              <div class="bg-primary text-primary-content rounded-full w-12">
+                                <span class="text-lg">{review.Name.charAt(0).toUpperCase()}</span>
+                              </div>
+                            </div>
+                          )}
+                          <div>
+                            <h3 class="font-semibold">{review.Name}</h3>
+                            <div class="flex items-center">
+                              <div class="flex text-warning">
+                                {[1, 2, 3, 4, 5].map(star => (
+                                  <svg xmlns="http://www.w3.org/2000/svg" class={`h-4 w-4 ${star <= review.Rating ? 'text-warning' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                                  </svg>
+                                ))}
+                              </div>
+                              {review.When && <span class="text-xs opacity-60 ml-2">{review.When}</span>}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {review.Description && (
+                        <p class="text-base">{review.Description}</p>
+                      )}
+                      
+                      {review.Images && review.Images.length > 0 && (
+                        <div class="flex gap-2 mt-4">
+                          {review.Images.map((img: string) => (
+                            <div class="w-24 h-24 overflow-hidden rounded-lg bg-base-200 flex items-center justify-center">
+                              {img ? (
+                                <img 
+                                  src={img} 
+                                  alt="Review image" 
+                                  class="w-full h-full object-cover" 
+                                  loading="lazy" 
+                                  onerror="this.style.display='none'; this.parentNode.classList.add('flex', 'items-center', 'justify-center');"
+                                />
+                              ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-base-content opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                
+                {plumber.reviewCount && plumber.reviewCount > 10 && (
+                  <div class="text-center mt-6">
+                    <span class="badge badge-ghost badge-lg">+{plumber.reviewCount - 10} more reviews</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      
+      <!-- Sidebar Contact Info -->
+      <div class="lg:col-span-1">
+        <div class="grid grid-cols-1 gap-6 sticky top-6">
+          <!-- Contact Card -->
+          <div class="card bg-base-100 shadow-lg overflow-hidden">
+            <div class="card-body">
+              <h2 class="card-title text-xl border-b border-base-300 pb-2 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                Contact Information
+              </h2>
+              
+              <div class="space-y-4">
+                {plumber.address && (
+                  <div class="flex">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-primary flex-shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <div>
+                      <h3 class="font-semibold text-sm text-gray-600 mb-1">Address</h3>
+                      <p>{plumber.address}</p>
+                      {plumber.city && plumber.state && (
+                        <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${plumber.address}, ${plumber.city}, ${plumber.state}`)}`} 
+                           target="_blank" 
+                           rel="noopener noreferrer" 
+                           class="text-sm text-primary flex items-center mt-1">
+                           Get directions
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                           </svg>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                {plumber.phone && (
+                  <div class="flex">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-primary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    <div>
+                      <h3 class="font-semibold text-sm text-gray-600 mb-1">Phone</h3>
+                      <a href={`tel:${plumber.phone}`} class="link link-primary text-lg">{plumber.phone}</a>
+                    </div>
+                  </div>
+                )}
+                
+                {plumber.website && (
+                  <div class="flex">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-primary flex-shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                    </svg>
+                    <div>
+                      <h3 class="font-semibold text-sm text-gray-600 mb-1">Website</h3>
+                      <a href={plumber.website} target="_blank" rel="noopener noreferrer" class="link link-primary break-words">{plumber.website.replace(/^https?:\/\//, '')}</a>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <!-- Call to Action Buttons -->
+              <div class="mt-6 space-y-3">
+                {plumber.phone && (
+                  <a href={`tel:${plumber.phone}`} class="btn btn-primary w-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    Call Now
+                  </a>
+                )}
+                
+                {plumber.website && (
+                  <a href={plumber.website} target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-primary w-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    Visit Website
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          <!-- Business Hours Card -->
+          {plumber.hours && Object.keys(plumber.hours).length > 0 && (
+            <div class="card bg-base-100 shadow-lg overflow-hidden">
+              <div class="card-body">
+                <h2 class="card-title text-xl border-b border-base-300 pb-2 mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Business Hours
+                </h2>
+                
+                <div class="overflow-x-auto">
+                  <table class="table table-compact w-full">
+                    <tbody>
+                      {formattedHours.map(({ day, schedule }) => {
+                        const isToday = new Date().toLocaleString('en-us', {weekday: 'long'}) === day;
+                        return (
+                          <tr class={isToday ? "font-bold bg-base-200" : ""}>
+                            <td class={`py-2 ${isToday ? "text-primary" : ""}`}>{day}</td>
+                            <td class={`py-2 text-right ${isToday ? "text-primary" : ""}`}>{schedule}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout> 

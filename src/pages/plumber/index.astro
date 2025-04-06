@@ -1,0 +1,56 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getPlumbersWithoutLocation } from '../../utils/dataUtils';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import PlumberGrid from '../../components/PlumberGrid.astro';
+
+// Get plumbers without location
+const plumbers = await getPlumbersWithoutLocation();
+
+// Sort plumbers by rating and review count
+const sortedPlumbers = [...plumbers].sort((a, b) => {
+  // First sort by rating
+  if (b.rating !== a.rating) {
+    return (b.rating || 0) - (a.rating || 0);
+  }
+  // Then by review count
+  return (b.reviewCount || 0) - (a.reviewCount || 0);
+});
+
+// SEO
+const title = "Plumbers Directory | Plumber Near Me";
+const description = "Browse our directory of plumbers. Find contact information, ratings, reviews, and more to help you choose the right plumbing professional for your needs.";
+---
+
+<Layout
+  title={title}
+  description={description}
+  canonicalUrl="/plumber/"
+>
+  <Breadcrumbs 
+    items={[
+      { name: "Plumbers", url: "/plumber/" }
+    ]}
+  />
+
+  <h1 class="text-4xl font-bold mb-2">Plumbers Directory</h1>
+  <p class="mb-8 text-lg max-w-3xl">Browse our comprehensive directory of plumbing professionals. These listings might not have specific location information, but you can still view their details and contact information.</p>
+
+  <div class="mb-8">
+    <PlumberGrid 
+      plumbers={sortedPlumbers} 
+      cols={3}
+    />
+  </div>
+
+  <div class="alert alert-info mb-8">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+    <span>Looking for plumbers in a specific area? Browse our <a href="/state/" class="link link-hover">state and city listings</a> to find local plumbers near you.</span>
+  </div>
+
+  <div class="mt-16 bg-base-200 rounded-xl p-8">
+    <h2 class="text-2xl font-bold mb-4">About Our Plumber Directory</h2>
+    <p class="mb-3">Our comprehensive plumber directory makes it easy to find qualified plumbing professionals. Browse plumbers, view ratings and reviews, and get the information you need to make an informed decision.</p>
+    <p>Each plumber listing includes important details such as contact information, service areas, customer reviews, and more. Our goal is to connect you with reliable plumbing services to address your plumbing needs.</p>
+  </div>
+</Layout> 

@@ -1,0 +1,139 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PlumberGrid from '../components/PlumberGrid.astro';
+import { getTopRatedPlumbers, getMostReviewedPlumbers, getAllStates } from '../utils/dataUtils';
+import { generateLocalBusinessListStructuredData } from '../utils/seoUtils';
+
+// Get data for homepage
+const topRatedPlumbers = await getTopRatedPlumbers(6);
+const mostReviewedPlumbers = await getMostReviewedPlumbers(3);
+const states = await getAllStates();
+
+// Sort states by number of plumbers
+const topStates = [...states].sort((a, b) => b.plumberCount - a.plumberCount).slice(0, 12);
+
+// Generate structured data
+const structuredData = generateLocalBusinessListStructuredData(
+  [...topRatedPlumbers, ...mostReviewedPlumbers], 
+  'United States'
+);
+
+const metaDescription = "Find reliable plumbers near you with Plumber Near Me. Our directory features top-rated plumbing professionals across the United States with verified reviews.";
+---
+
+<Layout 
+  title="Find Local Plumbers Near You" 
+  description={metaDescription}
+  structuredData={structuredData}
+>
+  <!-- Hero Section -->
+  <section class="hero bg-base-200 rounded-xl overflow-hidden">
+    <div class="hero-content flex-col lg:flex-row py-12">
+      <div class="max-w-md">
+        <h1 class="text-5xl font-bold">Find Trusted Plumbers Near You</h1>
+        <p class="py-6">Your reliable source for finding qualified plumbing professionals in your area. Browse our comprehensive directory of plumbers with verified reviews and ratings.</p>
+        <div class="flex gap-2">
+          <a href="/state" class="btn btn-primary">Browse by State</a>
+          <a href="/about" class="btn btn-outline btn-secondary">Learn More</a>
+        </div>
+      </div>
+      <img 
+        src="/images/hero-plumber.jpg" 
+        alt="Professional plumber" 
+        class="max-w-sm rounded-lg shadow-2xl"
+        width="500"
+        height="300"
+        loading="eager"
+      />
+    </div>
+  </section>
+
+  <!-- Quick Search Section -->
+  <section class="mt-12">
+    <h2 class="text-3xl font-bold mb-6">Find Plumbers by State</h2>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {topStates.map(state => (
+        <a 
+          href={`/state/${state.slug}`} 
+          class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow"
+        >
+          <div class="card-body p-4">
+            <h3 class="card-title text-lg">{state.name}</h3>
+            <p class="text-sm opacity-75">{state.plumberCount} plumbers</p>
+          </div>
+        </a>
+      ))}
+      <a href="/state" class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow">
+        <div class="card-body p-4 flex items-center justify-center">
+          <h3 class="card-title text-lg">View All States</h3>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- Top Rated Plumbers -->
+  <section class="mt-16">
+    <PlumberGrid 
+      plumbers={topRatedPlumbers} 
+      title="Top Rated Plumbers" 
+      subtitle="Discover the highest-rated plumbing professionals in our directory"
+      cols={3}
+    />
+  </section>
+
+  <!-- Most Reviewed Plumbers -->
+  <section class="mt-16">
+    <PlumberGrid 
+      plumbers={mostReviewedPlumbers} 
+      title="Most Reviewed Plumbers" 
+      subtitle="Plumbers with the most customer reviews and feedback"
+      cols={3}
+    />
+  </section>
+
+  <!-- Why Choose Us -->
+  <section class="mt-16 py-10 bg-base-200 rounded-xl">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-center mb-10">Why Choose Plumber Near Me</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="card bg-base-100">
+          <div class="card-body items-center text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3 class="text-xl font-semibold mt-4">Verified Reviews</h3>
+            <p class="mt-2">Authentic customer reviews to help you make informed decisions.</p>
+          </div>
+        </div>
+        <div class="card bg-base-100">
+          <div class="card-body items-center text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <h3 class="text-xl font-semibold mt-4">Local Search</h3>
+            <p class="mt-2">Easily find plumbers in your area with our location-based search.</p>
+          </div>
+        </div>
+        <div class="card bg-base-100">
+          <div class="card-body items-center text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3 class="text-xl font-semibold mt-4">Fast & Free</h3>
+            <p class="mt-2">Quick access to plumber information at no cost to you.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="mt-16 mb-8">
+    <div class="bg-primary text-primary-content rounded-xl p-8 text-center">
+      <h2 class="text-3xl font-bold mb-4">Ready to Find a Plumber?</h2>
+      <p class="mb-6 max-w-2xl mx-auto">Browse our comprehensive directory to find qualified plumbing professionals in your area.</p>
+      <a href="/state" class="btn btn-secondary">Get Started Now</a>
+    </div>
+  </section>
+</Layout>

@@ -1,0 +1,152 @@
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+
+// SEO
+const title = "Contact Us | Plumber Near Me";
+const description = "Get in touch with the Plumber Near Me team. We welcome your questions, feedback, and suggestions about our plumber directory.";
+
+<Layout
+  title={title}
+  description={description}
+  canonicalUrl="/contact/"
+>
+  <Breadcrumbs 
+    items={[
+      { name: "Contact", url: "/contact/" }
+    ]}
+  />
+
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-4xl font-bold mb-6">Contact Us</h1>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+      <div>
+        <div class="prose max-w-none">
+          <p class="lead text-xl">We'd love to hear from you! Use the form to get in touch with our team.</p>
+          
+          <p class="mt-4">
+            Whether you have questions about our directory, want to suggest improvements, or need assistance finding a plumber, we're here to help.
+          </p>
+          
+          <div class="mt-8">
+            <h3 class="text-xl font-bold">Contact Information</h3>
+            <ul class="mt-4 space-y-3">
+              <li class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <span>contact@plumbernearme.shop</span>
+              </li>
+              <li class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>United States</span>
+              </li>
+            </ul>
+          </div>
+          
+          <div class="alert alert-info mt-8">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span>Please note: We are a directory service, not a plumbing company. If you need immediate plumbing assistance, please <a href="/state" class="link link-hover">find a plumber</a> in your area.</span>
+          </div>
+        </div>
+      </div>
+      
+      <div>
+        <div class="card bg-base-100 shadow">
+          <div class="card-body">
+            <h2 class="card-title text-2xl mb-4">Send Us a Message</h2>
+            <form class="space-y-4">
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text">Your Name</span>
+                </label>
+                <input type="text" placeholder="Name" class="input input-bordered" />
+              </div>
+              
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text">Email Address</span>
+                </label>
+                <input type="email" placeholder="Email" class="input input-bordered" />
+              </div>
+              
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text">Subject</span>
+                </label>
+                <select class="select select-bordered w-full">
+                  <option disabled selected>Select a subject</option>
+                  <option>General Inquiry</option>
+                  <option>Feedback</option>
+                  <option>Report an Issue</option>
+                  <option>Business Listing Update</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text">Message</span>
+                </label>
+                <textarea class="textarea textarea-bordered h-36" placeholder="Your message"></textarea>
+              </div>
+              
+              <div class="form-control mt-6">
+                <button class="btn btn-primary">Submit Message</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="mt-16">
+      <h2 class="text-2xl font-bold mb-6">Frequently Asked Questions</h2>
+      
+      <div class="space-y-4">
+        <div class="collapse collapse-arrow bg-base-200">
+          <input type="radio" name="faq-accordion" checked="checked" /> 
+          <div class="collapse-title text-xl font-medium">
+            Are you a plumbing service?
+          </div>
+          <div class="collapse-content"> 
+            <p>No, Plumber Near Me is a directory service that helps connect consumers with plumbing professionals. We do not provide plumbing services directly.</p>
+          </div>
+        </div>
+        
+        <div class="collapse collapse-arrow bg-base-200">
+          <input type="radio" name="faq-accordion" /> 
+          <div class="collapse-title text-xl font-medium">
+            How do I get my plumbing business listed?
+          </div>
+          <div class="collapse-content"> 
+            <p>Please contact us using the form above with information about your business. We'll review your submission and get back to you about including your business in our directory.</p>
+          </div>
+        </div>
+        
+        <div class="collapse collapse-arrow bg-base-200">
+          <input type="radio" name="faq-accordion" /> 
+          <div class="collapse-title text-xl font-medium">
+            How do I update information about my business?
+          </div>
+          <div class="collapse-content"> 
+            <p>If you need to update information about your plumbing business in our directory, please contact us with the correct details and we'll make the necessary changes.</p>
+          </div>
+        </div>
+        
+        <div class="collapse collapse-arrow bg-base-200">
+          <input type="radio" name="faq-accordion" /> 
+          <div class="collapse-title text-xl font-medium">
+            Is your service free to use?
+          </div>
+          <div class="collapse-content"> 
+            <p>Yes, Plumber Near Me is completely free for consumers to use. We provide this directory service to help you find qualified plumbing professionals in your area.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout> 

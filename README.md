@@ -1,0 +1,134 @@
+# Plumber Near Me Directory
+
+A high-performance, SEO-optimized directory website for plumbers across the USA, built with Astro, Tailwind CSS, and DaisyUI.
+
+## Features
+
+- 🚀 Lightning-fast performance with Astro
+- 📱 Responsive design with Tailwind CSS and DaisyUI components
+- 🔍 SEO optimized with proper metadata, structured data, and sitemaps
+- 🗺️ Location-based browsing by state and city
+- 📊 Detailed plumber listings with comprehensive information
+- 📄 Essential legal pages (Privacy Policy, Terms of Service)
+- 📞 Contact form for user inquiries
+- 🤖 robots.txt and sitemap.xml for search engine optimization
+- 🖼️ Resilient image handling with fallback SVG icons
+- ⚡ On-demand rendering (ODR) for faster builds and better scalability
+
+## Tech Stack
+
+- [Astro](https://astro.build/) - Server-side rendering with on-demand page generation
+- [Cloudflare Pages](https://pages.cloudflare.com/) - Edge-based hosting with on-demand rendering
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- [DaisyUI](https://daisyui.com/) - Component library for Tailwind CSS
+- [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v16 or higher)
+- npm or yarn
+
+### Installation
+
+```bash
+# Clone the repository
+git clone [repository-url]
+
+# Navigate to the project directory
+cd plumber-astro-v44
+
+# Install dependencies
+npm install
+
+# Start the development server
+npm run dev
+```
+
+### Building for Production
+
+```bash
+# Build the project
+npm run build
+
+# Preview the production build
+npm run preview
+```
+
+## Project Structure
+
+```
+├── public/              # Static assets
+├── src/
+│   ├── components/      # Reusable UI components
+│   ├── data/            # JSON data sources
+│   ├── layouts/         # Page layouts
+│   ├── pages/           # Page components and routes
+│   ├── styles/          # Global styles
+│   └── utils/           # Utility functions
+├── astro.config.mjs     # Astro configuration
+├── tailwind.config.cjs  # Tailwind CSS configuration
+└── tsconfig.json        # TypeScript configuration
+```
+
+## Deployment
+
+This project is optimized for deployment on Cloudflare Pages with server-side rendering:
+
+- All detail pages (plumber, state, city) use on-demand rendering for faster builds
+- Stays well within Cloudflare Pages build limits by rendering pages at request time
+- Delivers content from the edge for optimal performance
+
+## Recent Improvements
+
+### Build Optimization
+
+- Implemented on-demand rendering (ODR) with Cloudflare to significantly reduce build times
+- Converted plumber detail pages from static to server-rendered to avoid build time exhaustion
+- Changed state and city pages to on-demand rendering to further reduce static build size
+- Updated Astro configuration to use hybrid rendering mode with Cloudflare adapter
+
+### Image Handling
+
+- Added fallback SVG icons for missing images
+- Redesigned homepage hero section to avoid external image dependencies
+- Improved error handling for missing images throughout the site
+
+### Route Generation
+
+- Updated dynamic route generation to include all plumbers
+- Enhanced error handling for non-existent routes
+
+## Performance Considerations
+
+- The site uses server-side rendering for all detail pages:
+  - Pages are rendered on-demand at request time, reducing build times
+  - First request to a page may be slightly slower but is cached at the edge
+- Image handling is optimized to avoid network requests for missing resources
+- Data loading is optimized to reduce memory usage during builds
+
+## Commands
+
+All commands are run from the root of the project, from a terminal:
+
+| Command             | Action                                           |
+| :------------------ | :----------------------------------------------- |
+| `npm install`       | Installs dependencies                            |
+| `npm run dev`       | Starts local dev server at `localhost:4321`      |
+| `npm run build`     | Build your production site to `./dist/`          |
+| `npm run preview`   | Preview your build locally, before deploying     |
+| `npm run astro ...` | Run CLI commands like `astro add`, `astro check` |
+
+## License
+
+[MIT License](LICENSE)
+
+## Acknowledgements
+
+- Data sourced from public business listings
+- Icons from [DaisyUI](https://daisyui.com/)
+
+```
+
+```

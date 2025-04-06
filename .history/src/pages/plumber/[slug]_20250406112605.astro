@@ -1,0 +1,243 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getPlumberBySlug, loadPlumberData, slugify } from '../../utils/dataUtils';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { generatePlumberStructuredData } from '../../utils/seoUtils';
+
+// Get the plumber slug from URL
+const { slug } = Astro.params;
+
+// Get plumber data
+const plumber = await getPlumberBySlug(slug || '');
+
+// If plumber not found, return 404
+if (!plumber) {
+  return Astro.redirect('/404');
+}
+
+// Build breadcrumb items
+let breadcrumbItems = [];
+if (plumber.state && plumber.city) {
+  breadcrumbItems = [
+    { name: "States", url: "/state/" },
+    { name: plumber.state, url: `/state/${slugify(plumber.state)}/` },
+    { name: plumber.city, url: `/state/${slugify(plumber.state)}/${slugify(plumber.city)}/` },
+    { name: plumber.title, url: `/plumber/${plumber.slug}/` }
+  ];
+} else {
+  breadcrumbItems = [
+    { name: "Plumbers", url: "/plumber/" },
+    { name: plumber.title, url: `/plumber/${plumber.slug}/` }
+  ];
+}
+
+// SEO
+const title = `${plumber.title} | Plumber in ${plumber.city || 'Your Area'}, ${plumber.state || ''}`;
+const description = plumber.description || `${plumber.title} provides plumbing services${plumber.city ? ` in ${plumber.city}, ${plumber.state}` : ''}. Contact them at ${plumber.phone || 'the provided contact details'} for all your plumbing needs.`;
+
+// Reviews summary
+const reviewSummary = plumber.review_summary || '';
+
+// Hours formatting
+function formatHours(hours: Record<string, string[]> | undefined) {
+  if (!hours) return [];
+  
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  return days.map(day => ({
+    day,
+    schedule: hours[day] ? hours[day][0] : 'Closed'
+  }));
+}
+
+const formattedHours = formatHours(plumber.hours);
+
+// Structured data
+const structuredData = generatePlumberStructuredData(plumber);
+
+// Generate static paths for top plumbers
+export async function getStaticPaths() {
+  const allPlumbers = await loadPlumberData();
+  
+  // Generate static pages for plumbers with most reviews
+  const topPlumbers = [...allPlumbers]
+    .sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0))
+    .slice(0, 1000); // Generate static pages for top 1000 plumbers
+  
+  return topPlumbers.map(plumber => ({
+    params: { slug: plumber.slug }
+  }));
+}
+---
+
+<Layout
+  title={title}
+  description={description}
+  canonicalUrl={`/plumber/${plumber.slug}/`}
+  structuredData={structuredData}
+>
+  <Breadcrumbs items={breadcrumbItems} />
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main Content -->
+    <div class="lg:col-span-2">
+      <h1 class="text-4xl font-bold mb-2">{plumber.title}</h1>
+      
+      {plumber.city && plumber.state && (
+        <p class="text-lg mb-4">
+          <a href={`/state/${slugify(plumber.state)}/${slugify(plumber.city)}/`} class="link link-hover">
+            {plumber.city}, {plumber.state}
+          </a>
+        </p>
+      )}
+      
+      <!-- Rating and Reviews Summary -->
+      <div class="flex items-center mb-6">
+        {plumber.rating && (
+          <div class="badge badge-lg badge-primary mr-3">★ {plumber.rating.toFixed(1)}</div>
+        )}
+        {plumber.reviewCount && (
+          <span class="text-base">
+            {plumber.reviewCount} {plumber.reviewCount === 1 ? 'review' : 'reviews'}
+          </span>
+        )}
+      </div>
+      
+      <!-- Gallery -->
+      {plumber.images && plumber.images.length > 0 && (
+        <div class="mb-8">
+          <h2 class="text-2xl font-bold mb-3">Gallery</h2>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {plumber.images.slice(0, 6).map((image) => (
+              <div class="aspect-square overflow-hidden rounded-lg">
+                <img 
+                  src={image.image} 
+                  alt={`${plumber.title} - ${image.title}`} 
+                  class="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      <!-- Summary/Description -->
+      {reviewSummary && (
+        <div class="mb-8">
+          <h2 class="text-2xl font-bold mb-3">About {plumber.title}</h2>
+          <div class="bg-base-100 p-6 rounded-xl shadow-sm">
+            <p class="whitespace-pre-line">{reviewSummary}</p>
+          </div>
+        </div>
+      )}
+      
+      <!-- Reviews -->
+      {plumber.reviews && plumber.reviews.length > 0 && (
+        <div class="mb-8">
+          <h2 class="text-2xl font-bold mb-3">Customer Reviews</h2>
+          <div class="space-y-4">
+            {plumber.reviews.slice(0, 10).map((review, index) => (
+              <div class="card bg-base-100 shadow-sm">
+                <div class="card-body p-5">
+                  <div class="flex justify-between">
+                    <div class="flex items-center gap-3">
+                      {review.ProfilePicture && (
+                        <div class="avatar">
+                          <div class="w-10 rounded-full">
+                            <img src={review.ProfilePicture} alt={review.Name} />
+                          </div>
+                        </div>
+                      )}
+                      <div>
+                        <h3 class="font-semibold">{review.Name}</h3>
+                        <div class="flex items-center">
+                          <span class="text-warning">
+                            {'★'.repeat(review.Rating)}
+                            {'☆'.repeat(5 - review.Rating)}
+                          </span>
+                          {review.When && <span class="text-xs opacity-60 ml-2">{review.When}</span>}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {review.Description && (
+                    <p class="mt-3 text-sm">{review.Description}</p>
+                  )}
+                  {review.Images && review.Images.length > 0 && (
+                    <div class="flex gap-2 mt-3">
+                      {review.Images.map((img: string) => (
+                        <div class="w-20 h-20 overflow-hidden rounded-md">
+                          <img src={img} alt="Review image" class="w-full h-full object-cover" loading="lazy" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="lg:col-span-1">
+      <div class="card bg-base-100 shadow-md sticky top-4">
+        <div class="card-body">
+          <!-- Contact Info -->
+          <h2 class="card-title text-xl mb-4">Contact Information</h2>
+          
+          {plumber.address && (
+            <div class="mb-4">
+              <h3 class="font-semibold mb-1">Address:</h3>
+              <p>{plumber.address}</p>
+            </div>
+          )}
+          
+          {plumber.phone && (
+            <div class="mb-4">
+              <h3 class="font-semibold mb-1">Phone:</h3>
+              <a href={`tel:${plumber.phone}`} class="link link-primary">{plumber.phone}</a>
+            </div>
+          )}
+          
+          {plumber.website && (
+            <div class="mb-4">
+              <h3 class="font-semibold mb-1">Website:</h3>
+              <a href={plumber.website} target="_blank" rel="noopener noreferrer" class="link link-primary overflow-hidden text-ellipsis">{plumber.website.replace(/^https?:\/\//, '')}</a>
+            </div>
+          )}
+          
+          <!-- Business Hours -->
+          {plumber.hours && Object.keys(plumber.hours).length > 0 && (
+            <div class="mt-2">
+              <h3 class="font-semibold mb-2">Business Hours:</h3>
+              <table class="w-full text-sm">
+                <tbody>
+                  {formattedHours.map(({ day, schedule }) => (
+                    <tr class="border-t border-base-300">
+                      <td class="py-2 font-medium">{day}</td>
+                      <td class="py-2 text-right">{schedule}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          
+          {plumber.website && (
+            <div class="card-actions mt-6">
+              <a href={plumber.website} target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-block">Visit Website</a>
+            </div>
+          )}
+          
+          {plumber.phone && (
+            <div class="card-actions mt-2">
+              <a href={`tel:${plumber.phone}`} class="btn btn-outline btn-block">Call Now</a>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout> 

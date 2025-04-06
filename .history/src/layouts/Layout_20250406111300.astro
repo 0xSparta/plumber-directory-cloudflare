@@ -1,0 +1,82 @@
+---
+import '../styles/global.css';
+
+interface Props {
+	title?: string;
+	description?: string;
+	image?: string;
+	canonicalURL?: string;
+	theme?: string;
+}
+
+const { 
+	title = "Plumber Near Me - Find Local Plumbing Services",
+	description = "Find reliable plumbers near you. Compare reviews, services, and contact information for plumbing professionals in your area.",
+	image = "/images/plumber-near-me-og.jpg",
+	canonicalURL = Astro.url.href,
+	theme = "light" 
+} = Astro.props;
+
+const siteUrl = "https://plumbernearme.shop";
+---
+
+<!doctype html>
+<html lang="en" data-theme={theme}>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="icon" type="image/png" href="/favicon.png" />
+		<meta name="generator" content={Astro.generator} />
+		
+		<!-- Primary Meta Tags -->
+		<title>{title}</title>
+		<meta name="title" content={title} />
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonicalURL} />
+		
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content={canonicalURL} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={`${siteUrl}${image}`} />
+		
+		<!-- Twitter -->
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content={canonicalURL} />
+		<meta property="twitter:title" content={title} />
+		<meta property="twitter:description" content={description} />
+		<meta property="twitter:image" content={`${siteUrl}${image}`} />
+
+		<!-- JSON-LD for Organization -->
+		<script type="application/ld+json">
+			{
+				"@context": "https://schema.org",
+				"@type": "Organization",
+				"name": "Plumber Near Me",
+				"url": "https://plumbernearme.shop",
+				"logo": "https://plumbernearme.shop/images/logo.png",
+				"sameAs": [
+					"https://facebook.com/plumbernearme",
+					"https://twitter.com/plumbernearme"
+				]
+			}
+		</script>
+	</head>
+	<body class="min-h-screen flex flex-col">
+		<slot name="header" />
+		<main class="flex-grow">
+			<slot />
+		</main>
+		<slot name="footer" />
+	</body>
+</html>
+
+<style>
+	html,
+	body {
+		margin: 0;
+		width: 100%;
+		height: 100%;
+	}
+</style>
