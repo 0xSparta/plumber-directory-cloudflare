@@ -43,10 +43,6 @@ export interface CityData {
 let plumberDataCache: PlumberData[] | null = null;
 let stateDataCache: StateData[] | null = null;
 
-// Always use the smaller dataset for local development and GitHub builds
-// but the full dataset for production Cloudflare deployments
-const useDevData = true; // Set to false for production deployment with full data
-
 // Load and process data from the JSON files
 export async function loadPlumberData(): Promise<PlumberData[]> {
   // Return cached data if available to reduce memory usage and improve performance
@@ -55,23 +51,14 @@ export async function loadPlumberData(): Promise<PlumberData[]> {
   }
 
   try {
-    // In development or for GitHub builds, use the smaller dataset
-    if (useDevData) {
-      const { default: devData } = await import(
-        "../data/plumber-usa-results-astro-dev.json"
-      );
-      plumberDataCache = devData as PlumberData[];
-      return plumberDataCache;
-    }
-
-    // In production, use the full dataset
-    const { default: data } = await import(
-      "../data/plumber-usa-results-astro.json"
+    // Always use the dev dataset for Cloudflare deployment
+    const { default: devData } = await import(
+      "../data/plumber-usa-results-astro-dev.json"
     );
-    plumberDataCache = data as PlumberData[];
+    plumberDataCache = devData as PlumberData[];
     return plumberDataCache;
   } catch (error) {
-    // Fallback to sample data if the main file fails to load
+    // Fallback to sample data if the dev file fails to load
     try {
       const { default: sampleData } = await import(
         "../data/plumber-usa-results-astro-sample.json"
